@@ -5,7 +5,6 @@ import optparse
 import sys
 import socket
 import time
-import subprocess
 from datetime import datetime
 import output_messages
 import basedefs
@@ -49,7 +48,7 @@ class PortScanner():
         self.ports = ports
         self.type = type
 
-    def port_scanner(self):
+    def port_scanner_full(self):
         """
         Scans the ports of the given ip address
 
@@ -104,8 +103,31 @@ class PortScanner():
                     _protocol = basedefs.ports_mapping[port].split(',')[0]
 
                 sock = socket.socket(_socket_family, _socket_type)
-                result = sock.connect_ex((self.dst_ip_address, int(port)))
-                if result == 0:
+                sock.settimeout(basedefs.SOCKET_TIMEOUT)
+                if self.protocol_type == 'UDP':
+                    try:
+                        sock.sendto("--TEST LINE--", (self.dst_ip_address, int(port)))
+                        recv, svr = sock.recvfrom(255)
+                        print(
+                            _(output_messages.OPEN_PORT.format(
+                                port,
+                                _protocol
+                            ))
+                        )
+
+                    except socket.error:
+                        pass
+                    except socket.timeout:
+                        pass
+
+                _result = -1
+                if self.protocol_type == 'TCP':
+                    try:
+                        _result = sock.connect_ex((self.dst_ip_address, int(port)))
+                    except socket.error:
+                        pass
+
+                if _result == 0:
                     print(
                         _(output_messages.OPEN_PORT.format(
                             port,
@@ -120,14 +142,6 @@ class PortScanner():
                 _(output_messages.KEYBOARD_INTERRUPT)
             )
             sys.exit(Status.KEYBOARD_INTERRUPT)
-
-        except socket.error:
-            print(
-                _(output_messages.CANNOT_CONNECT.format(
-                    self.dst_ip_address,
-                ))
-            )
-            sys.exit(Status.CANNOT_CONNECT)
 
         # End scan time
         _t2 = datetime.now()
@@ -172,7 +186,8 @@ def get_args():
     parser.add_option('--protocol-type',
                       dest='protocol_type',
                       help='protocol type [UDP/TCP/ICMP]')
-    parser.add_option('--port', '-p', dest='ports',
+    parser.add_option('--port', '-p',
+                      dest='ports',
                       help='ports [can be range : -p 22-54,'
                            'can be single port : -p 80, can be combination '
                            ': -p 80,43,23,125]')
@@ -194,7 +209,7 @@ def main():
     if not options.ip:
         print(
             _(output_messages.MISSING_OPTION.format(
-                '--ip',
+                '--ip'
             ))
         )
 
@@ -221,7 +236,8 @@ def main():
                                options.protocol_type,
                                options.scan_type,
                                options.ports)
-    port_scanner.port_scanner()
+    if options.scan_type == 'full':
+        port_scanner.port_scanner_full()
 
 if __name__ == '__main__':
     main()

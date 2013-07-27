@@ -12,7 +12,7 @@ BLUE = '\033[34m'
 NO_COLOR = '\033[0m'
 
 CANNOT_CONNECT = RED + 'ERROR:' + NO_COLOR \
-    + 'Could not connect to server "{0}"'
+    + 'Could not connect to server "{0}" on protocol "{1}" port "{2}"'
 MISSING_OPTION = RED + 'ERROR:' + NO_COLOR + ' Missing option "{}"'
 KEYBOARD_INTERRUPT = 'You pressed Ctrl+C'
 SCANNING = 'Please wait, scanning remote ip "{0}"'
