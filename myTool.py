@@ -161,20 +161,28 @@ def get_args():
     Command line options
     """
     parser = optparse.OptionParser(description='Reads user command line args.')
-    parser.add_option('--ip', dest='ip',
+    parser.add_option('--ip',
+                      dest='ip',
                       help='target ip address')
-    parser.add_option('--time-interval', '-t', dest='time_interval',
-                      type='int', default='2000',
+    parser.add_option('--time-interval', '-t',
+                      dest='time_interval',
+                      type='int',
+                      default='2000',
                       help='time interval between each scan in milliseconds')
-    parser.add_option('--protocol-type', dest='protocol_type',
+    parser.add_option('--protocol-type',
+                      dest='protocol_type',
                       help='protocol type [UDP/TCP/ICMP]')
     parser.add_option('--port', '-p', dest='ports',
                       help='ports [can be range : -p 22-54,'
-                           'can be single port : -p 80, can be combination : -p 80,43,23,125]')
-    parser.add_option('--type', dest='scan_type',
+                           'can be single port : -p 80, can be combination '
+                           ': -p 80,43,23,125]')
+    parser.add_option('--type',
+                      dest='scan_type',
                       default='full',
                       help='scan type [full,stealth,fin,ack]')
-    parser.add_option('--banner_grabber', '-b', dest='banner_grabber', action='store_true',
+    parser.add_option('--banner_grabber', '-b',
+                      dest='banner_grabber',
+                      action='store_true',
                       help='bannerGrabber status (Should work only for TCP)')
 
     return parser.parse_args()

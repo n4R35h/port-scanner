@@ -11,13 +11,15 @@ YELLOW = '\033[33m'
 BLUE = '\033[34m'
 NO_COLOR = '\033[0m'
 
-CANNOT_CONNECT = RED + 'ERROR:' + NO_COLOR + 'Could not connect to server "{0}"'
+CANNOT_CONNECT = RED + 'ERROR:' + NO_COLOR \
+    + 'Could not connect to server "{0}"'
 MISSING_OPTION = RED + 'ERROR:' + NO_COLOR + ' Missing option "{}"'
 KEYBOARD_INTERRUPT = 'You pressed Ctrl+C'
 SCANNING = 'Please wait, scanning remote ip "{0}"'
 OPEN_PORT = 'Port "{0}": \t' + GREEN + 'Open' + NO_COLOR + ' [{1}]'
 RANGE_ERROR = RED + 'ERROR:' + NO_COLOR \
-                    + ' in "--ip" First argument "{0}" cannot be lower then second "{1}"'
+                    + ' in "--ip" First argument "{0}" ' \
+                      'cannot be lower then second "{1}"'
 SCANNING_COMPLETED = 'Scan Completed in: {0}'
 CANT_RECOGNIZE = RED + 'CANT RECOGNIZE PROTOCOL' + NO_COLOR
 SCANNING_STARTED = 'Scanning started at : {0}'
