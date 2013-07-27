@@ -57,6 +57,7 @@ class PortScanner():
         _socket_type = None
         _socket_family = socket.AF_INET
         _ports = [self.ports]
+        _protocol = output_messages.CANT_RECOGNIZE
 
         # Validate socket
         if self.protocol_type == 'TCP':
@@ -91,14 +92,16 @@ class PortScanner():
         _t1 = datetime.now()
 
         try:
-            print(_ports)
             for port in _ports:
+                if port in basedefs.ports_mapping:
+                   _protocol = basedefs.ports_mapping[port].split(',')[0]
                 sock = socket.socket(_socket_family, _socket_type)
                 result = sock.connect_ex((self.dst_ip_address, int(port)))
                 if result == 0:
                     print(
                         _(output_messages.OPEN_PORT.format(
-                            port
+                            port,
+                            _protocol
                         ))
                     )
                 sock.close()
