@@ -83,18 +83,26 @@ class PortScanner():
             _ports.append(int(__ports[1]))
 
         print(
+            _(output_messages.DELIMITER)
+        )
+        print(
             _(output_messages.SCANNING.format(
                 self.dst_ip_address
             ))
         )
+        print(
+            _(output_messages.DELIMITER)
+        )
 
         # Start scan time
+        _start_time = time.ctime()
         _t1 = datetime.now()
 
         try:
             for port in _ports:
                 if port in basedefs.ports_mapping:
-                   _protocol = basedefs.ports_mapping[port].split(',')[0]
+                    _protocol = basedefs.ports_mapping[port].split(',')[0]
+
                 sock = socket.socket(_socket_family, _socket_type)
                 result = sock.connect_ex((self.dst_ip_address, int(port)))
                 if result == 0:
@@ -123,7 +131,24 @@ class PortScanner():
 
         # End scan time
         _t2 = datetime.now()
+        _end_time = time.ctime()
         _total = _t2 - _t1
+
+        print('\n\n')
+        print(
+            _(output_messages.SUMMARY)
+        )
+        print(
+            _(output_messages.SCANNING_STARTED.format(
+                _start_time
+            ))
+        )
+        print(
+            _(output_messages.SCANNING_ENDED.format(
+                _end_time
+            ))
+        )
+
         print(
             _(output_messages.SCANNING_COMPLETED.format(
                 _total
