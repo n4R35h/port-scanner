@@ -88,7 +88,7 @@ class PortScanner():
         )
 
         # Start scan time
-        t1 = datetime.now()
+        _t1 = datetime.now()
 
         try:
             print(_ports)
@@ -117,6 +117,15 @@ class PortScanner():
                 ))
             )
             sys.exit(Status.CANNOT_CONNECT)
+
+        # End scan time
+        _t2 = datetime.now()
+        _total = _t2 - _t1
+        print(
+            _(output_messages.SCANNING_COMPLETED.format(
+                _total
+            ))
+        )
 
 
 def get_args():
