@@ -3,10 +3,19 @@
 """
 Output messages for the program
 """
-CANNOT_CONNECT = 'Could not connect to server "{0}"'
-MISSING_OPTION = 'Missing option "{0}"'
+
+# Text colors
+RED = '\033[0;31m'
+GREEN = '\033[32m'
+YELLOW = '\033[33m'
+BLUE = '\033[34m'
+NO_COLOR = '\033[0m'
+
+CANNOT_CONNECT = RED + 'ERROR:' + NO_COLOR + 'Could not connect to server "{0}"'
+MISSING_OPTION = RED + 'ERROR:' + NO_COLOR + ' Missing option "{}"'
 KEYBOARD_INTERRUPT = 'You pressed Ctrl+C'
 SCANNING = 'Please wait, scanning remote ip "{0}"'
-OPEN_PORT = 'Port "{0}": \t Open'
-RANGE_ERROR = 'ERROR in "--ip" First argument "{0}" cannot be lower then second "{1}"'
+OPEN_PORT = 'Port "{0}": \t' + GREEN + 'Open' + NO_COLOR
+RANGE_ERROR = RED + 'ERROR:' + NO_COLOR \
+              + ' in "--ip" First argument "{0}" cannot be lower then second "{1}"'
 SCANNING_COMPLETED = 'Scan Completed in: {0}'

@@ -5,10 +5,10 @@ import optparse
 import sys
 import socket
 import time
-import re
 import subprocess
 from datetime import datetime
 import output_messages
+import basedefs
 
 _ = lambda m: gettext.dgettext(message=m, domain='myTool')
 
@@ -64,7 +64,7 @@ class PortScanner():
         if self.protocol_type == 'UDP':
             _socket_type = socket.SOCK_DGRAM
 
-        # Validate IP
+        # Validate ports
         if ',' in self.ports:
             _ports = self.ports.split(',')
         if '-' in self.ports:
@@ -98,7 +98,7 @@ class PortScanner():
                 if result == 0:
                     print(
                         _(output_messages.OPEN_PORT.format(
-                            port,
+                            port
                         ))
                     )
                 sock.close()
