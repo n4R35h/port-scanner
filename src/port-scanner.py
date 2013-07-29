@@ -20,7 +20,7 @@ except ImportError:
         ))
     )
 
-_ = lambda m: gettext.dgettext(message=m, domain='myTool')
+_ = lambda m: gettext.dgettext(message=m, domain='port-scanner')
 
 
 class Status:
