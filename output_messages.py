@@ -32,3 +32,5 @@ CANT_IMPORT = 'Sorry, cannot import {0} module. ' \
               'Please install it and run once again'
 IP_NOT_VALID = '{0} is not a valid ip address'
 IP_RANGE_NOT_VALID = '{0} is not a valid ip range'
+ERR_EXP_INVALID_PERM = 'Error: insufficient permissions for user {}, ' \
+                       'you must run with user root.'

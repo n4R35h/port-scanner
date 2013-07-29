@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import gettext
+import pwd
+import os
 import re
 import optparse
 import sys
@@ -31,6 +33,7 @@ class Status:
     CANNOT_CONNECT = 3
     RANGE_ERROR = 4
     IP_ERROR = 5
+    PERMISSION_ERROR = 6
 
 
 def get_args():
@@ -264,7 +267,25 @@ def map_network(ip_range):
             pass
 
 
+def _verifyUserPermissions():
+    """
+    Verifies that app will be executed with a root
+    permissions
+    """
+
+    _username = pwd.getpwuid(os.getuid())[0]
+    if os.geteuid() != 0:
+        print(
+            _(output_messages.ERR_EXP_INVALID_PERM.format(
+                _username
+            ))
+        )
+        sys.exit(Status.PERMISSION_ERROR)
+
+
 def main():
+
+    _verifyUserPermissions()
     (options, args) = get_args()
 
     if options.scan and options.ip_range:
