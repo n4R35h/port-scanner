@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import gettext
+import re
 import optparse
 import sys
 import socket
@@ -8,6 +9,14 @@ import time
 from datetime import datetime
 import output_messages
 import basedefs
+try:
+    import iptools
+except ImportError:
+    print(
+        _(output_messages.CANT_IMPORT.format(
+            'iptools'
+        ))
+    )
 
 _ = lambda m: gettext.dgettext(message=m, domain='myTool')
 
@@ -21,6 +30,47 @@ class Status:
     KEYBOARD_INTERRUPT = 2
     CANNOT_CONNECT = 3
     RANGE_ERROR = 4
+
+
+def get_args():
+    """
+    Command line options
+    """
+    parser = optparse.OptionParser(description='Reads user command line args.')
+    parser.add_option('--ip',
+                      dest='ip',
+                      help='target ip address')
+    parser.add_option('--time-interval', '-t',
+                      dest='time_interval',
+                      type='int',
+                      default='2000',
+                      help='time interval between each scan in milliseconds')
+    parser.add_option('--protocol-type',
+                      dest='protocol_type',
+                      help='protocol type [UDP/TCP/ICMP]')
+    parser.add_option('--port', '-p',
+                      dest='ports',
+                      help='ports [can be range : -p 22-54,'
+                           'can be single port : -p 80, can be combination '
+                           ': -p 80,43,23,125]')
+    parser.add_option('--type',
+                      dest='scan_type',
+                      default='full',
+                      help='scan type [full, stealth, fin, ack]')
+    parser.add_option('--banner_grabber', '-b',
+                      dest='banner_grabber',
+                      action='store_true',
+                      help='bannerGrabber status (Should work only for TCP)')
+    parser.add_option('--scan',
+                      dest='scan',
+                      action='store_true',
+                      help='scan the ip range for ICMP replies')
+    parser.add_option('--ip-range',
+                      dest='ip_range',
+                      help='ip range. Should be used only with "--scan" option. '
+                           'Example: 10.0.0.0-10.0.0.255')
+
+    return parser.parse_args()
 
 
 class PortScanner():
@@ -106,7 +156,7 @@ class PortScanner():
                 sock.settimeout(basedefs.SOCKET_TIMEOUT)
                 if self.protocol_type == 'UDP':
                     try:
-                        sock.sendto("--TEST LINE--", (self.dst_ip_address, int(port)))
+                        sock.sendto(output_messages.TEST_STR, (self.dst_ip_address, int(port)))
                         recv, svr = sock.recvfrom(255)
                         print(
                             _(output_messages.OPEN_PORT.format(
@@ -170,41 +220,64 @@ class PortScanner():
         )
 
 
-def get_args():
+def map_network(ip_range):
     """
-    Command line options
-    """
-    parser = optparse.OptionParser(description='Reads user command line args.')
-    parser.add_option('--ip',
-                      dest='ip',
-                      help='target ip address')
-    parser.add_option('--time-interval', '-t',
-                      dest='time_interval',
-                      type='int',
-                      default='2000',
-                      help='time interval between each scan in milliseconds')
-    parser.add_option('--protocol-type',
-                      dest='protocol_type',
-                      help='protocol type [UDP/TCP/ICMP]')
-    parser.add_option('--port', '-p',
-                      dest='ports',
-                      help='ports [can be range : -p 22-54,'
-                           'can be single port : -p 80, can be combination '
-                           ': -p 80,43,23,125]')
-    parser.add_option('--type',
-                      dest='scan_type',
-                      default='full',
-                      help='scan type [full,stealth,fin,ack]')
-    parser.add_option('--banner_grabber', '-b',
-                      dest='banner_grabber',
-                      action='store_true',
-                      help='bannerGrabber status (Should work only for TCP)')
+    Sends ICMP packet to the ip range and maps the network
 
-    return parser.parse_args()
+    Parameters:
+        ip_range - range of ip's to scan
+    """
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_RAW,
+                      socket.getprotobyname('icmp'))
+
+    s.settimeout(basedefs.SOCKET_TIMEOUT)
+
+    _start, _end = ip_range.replace(' ', '').split('-')[:]
+    _is_start_valid = re.match(basedefs.IP_REGEX, _start)
+    _is_end_valid = re.match(basedefs.IP_REGEX, _end)
+
+    if not _is_start_valid:
+        print(
+            _(output_messages.IP_NOT_VALID.format(
+                _start
+            ))
+        )
+
+    if not _is_end_valid:
+        print(
+            _(output_messages.IP_NOT_VALID.format(
+                _end
+            ))
+        )
+
+    r = iptools.IpRange(_start, _end)
+
+    for ip in r:
+        try:
+            s.connect((ip, 22))
+            s.send(output_messages.TEST_STR)
+            buf = s.recv(basedefs.BUFSIZE)
+
+            if output_messages.TEST_STR in buf:
+                print(
+                    _(output_messages.IP_IS_UP.format(
+                        ip
+                    ))
+                )
+                time.sleep(1)
+        except socket.error:
+            pass
 
 
 def main():
     (options, args) = get_args()
+    print(args)
+    print(options)
+
+    if options.scan and options.ip_range:
+        map_network(options.ip_range)
+        sys.exit(Status.OK)
 
     if not options.ip:
         print(
@@ -212,7 +285,6 @@ def main():
                 '--ip'
             ))
         )
-
         sys.exit(Status.MISSING_OPTION)
 
     if not options.protocol_type:
@@ -236,8 +308,10 @@ def main():
                                options.protocol_type,
                                options.scan_type,
                                options.ports)
+
     if options.scan_type == 'full':
         port_scanner.port_scanner_full()
+
 
 if __name__ == '__main__':
     main()

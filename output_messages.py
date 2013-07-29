@@ -26,3 +26,8 @@ SCANNING_STARTED = 'Scanning started at : {0}'
 SCANNING_ENDED = 'Scanning ended at : {0}'
 SUMMARY = YELLOW + 'SUMMARY:' + NO_COLOR
 DELIMITER = '-' * 60
+IP_IS_UP = '"{0}" ' + GREEN + '\tUP' + NO_COLOR
+TEST_STR = '--TEST LINE--'
+CANT_IMPORT = 'Sorry, cannot import {0} module. ' \
+              'Please install it and run once again'
+IP_NOT_VALID = '{0} is not a valid ip address'
