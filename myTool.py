@@ -30,6 +30,7 @@ class Status:
     KEYBOARD_INTERRUPT = 2
     CANNOT_CONNECT = 3
     RANGE_ERROR = 4
+    IP_ERROR = 5
 
 
 def get_args():
@@ -228,28 +229,21 @@ def map_network(ip_range):
         ip_range - range of ip's to scan
     """
 
+    _is_range_valid = re.match(basedefs.IP_RANGE_REGEX, ip_range)
+    if not _is_range_valid:
+        print(
+            _(output_messages.IP_RANGE_NOT_VALID.format(
+                ip_range
+            ))
+        )
+        sys.exit(Status.IP_ERROR)
+
     s = socket.socket(socket.AF_INET, socket.SOCK_RAW,
                       socket.getprotobyname('icmp'))
 
     s.settimeout(basedefs.SOCKET_TIMEOUT)
 
     _start, _end = ip_range.replace(' ', '').split('-')[:]
-    _is_start_valid = re.match(basedefs.IP_REGEX, _start)
-    _is_end_valid = re.match(basedefs.IP_REGEX, _end)
-
-    if not _is_start_valid:
-        print(
-            _(output_messages.IP_NOT_VALID.format(
-                _start
-            ))
-        )
-
-    if not _is_end_valid:
-        print(
-            _(output_messages.IP_NOT_VALID.format(
-                _end
-            ))
-        )
 
     r = iptools.IpRange(_start, _end)
 
@@ -272,8 +266,6 @@ def map_network(ip_range):
 
 def main():
     (options, args) = get_args()
-    print(args)
-    print(options)
 
     if options.scan and options.ip_range:
         map_network(options.ip_range)

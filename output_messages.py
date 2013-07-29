@@ -31,3 +31,4 @@ TEST_STR = '--TEST LINE--'
 CANT_IMPORT = 'Sorry, cannot import {0} module. ' \
               'Please install it and run once again'
 IP_NOT_VALID = '{0} is not a valid ip address'
+IP_RANGE_NOT_VALID = '{0} is not a valid ip range'
