@@ -27,6 +27,7 @@ class Status:
     """
     Exit statuses
     """
+
     OK = 0
     MISSING_OPTION = 1
     KEYBOARD_INTERRUPT = 2
@@ -40,6 +41,7 @@ def get_args():
     """
     Command line options
     """
+
     parser = optparse.OptionParser(description='Reads user command line args.')
     parser.add_option('--ip',
                       dest='ip',
@@ -102,11 +104,12 @@ class PortScanner():
         self.ports = ports
         self.type = type
 
-    def port_scanner_full(self):
+    def port_scanner(self):
         """
         Scans the ports of the given ip address
 
         """
+
         _socket_type = None
         _socket_family = socket.AF_INET
         _ports = [self.ports]
@@ -283,38 +286,13 @@ def _verifyUserPermissions():
         sys.exit(Status.PERMISSION_ERROR)
 
 
-def main():
-
-    _verifyUserPermissions()
-    (options, args) = get_args()
-
-    if options.scan and options.ip_range:
-        map_network(options.ip_range)
-        sys.exit(Status.OK)
-
-    if not options.ip:
-        print(
-            _(output_messages.MISSING_OPTION.format(
-                '--ip'
-            ))
-        )
-        sys.exit(Status.MISSING_OPTION)
-
-    if not options.protocol_type:
-        print(
-            _(output_messages.MISSING_OPTION.format(
-                '--protocol-type'
-            ))
-        )
-        sys.exit(Status.MISSING_OPTION)
-
-    if not options.ports:
-        print(
-            _(output_messages.MISSING_OPTION.format(
-                '--port | -p'
-            ))
-        )
-        sys.exit(Status.MISSING_OPTION)
+def create_port_scanner(options):
+    """
+    Creates port_scanner object
+    Parameters:
+        options - option to create a port scanner object
+    Returns port_scanner object
+    """
 
     port_scanner = PortScanner(options.ip,
                                options.time_interval,
@@ -322,8 +300,29 @@ def main():
                                options.scan_type,
                                options.ports)
 
-    if options.scan_type == 'full':
-        port_scanner.port_scanner_full()
+    return port_scanner
+
+
+def main():
+    """
+    Main
+    """
+
+    _verifyUserPermissions()
+    (options, args) = get_args()
+
+    if options.scan \
+            and options.ip_range:
+        map_network(options.ip_range)
+        sys.exit(Status.OK)
+
+    if options.ip \
+        and options.protocol_type \
+            and options.ports \
+            and options.scan_type == 'full':
+        port_scanner = create_port_scanner(options)
+        port_scanner.port_scanner()
+        sys.exit(Status.OK)
 
 
 if __name__ == '__main__':
