@@ -127,6 +127,7 @@ class PortScanner():
         _socket_type = None
         _socket_family = socket.AF_INET
         _ports = [self.ports]
+        _total_open_ports = 0
 
         # Validate socket
         if self.protocol_type == 'TCP':
@@ -185,6 +186,7 @@ class PortScanner():
                                 _protocol
                             ))
                         )
+                        _total_open_ports += 1
 
                     except socket.error:
                         pass
@@ -211,6 +213,7 @@ class PortScanner():
 
                                     sock.close()
                                     time.sleep(self.interval * 0.001)
+                                    _total_open_ports += 1
                                     continue
                             print(
                                 _(output_messages.OPEN_PORT.format(
@@ -218,6 +221,7 @@ class PortScanner():
                                     _protocol
                                 ))
                             )
+                            _total_open_ports += 1
                     except socket.error:
                         pass
 
@@ -238,6 +242,11 @@ class PortScanner():
         print('\n\n')
         print(
             _(output_messages.SUMMARY)
+        )
+        print(
+            _(output_messages.TOTAL_OPEN_PORTS.format(
+                _total_open_ports
+            ))
         )
         print(
             _(output_messages.SCANNING_STARTED.format(
