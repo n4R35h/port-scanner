@@ -27,7 +27,8 @@ SCANNING_STARTED = 'Scanning started at : {0}'
 SCANNING_ENDED = 'Scanning ended at : {0}'
 SUMMARY = YELLOW + 'SUMMARY:' + NO_COLOR
 DELIMITER = '-' * 60
-IP_IS_UP = '"{0}" ' + GREEN + '\tUP' + NO_COLOR
+HOST_IS_UP = '"{0}"\t' + 'Status: ' + GREEN + 'UP' + NO_COLOR
+HOST_IS_DOWN = '"{0}"\t ' + 'Status: ' + RED + 'DOWN' + NO_COLOR
 TEST_STR = '--TEST LINE--'
 CANT_IMPORT = 'Sorry, cannot import {0} module. ' \
               'Please install it and run once again'
@@ -37,3 +38,5 @@ ERR_EXP_INVALID_PERM = 'Error: insufficient permissions for user {}, ' \
                        'you must run with user root.'
 TOTAL_OPEN_PORTS = 'Total open ports: {0}'
 TOTAL_HOSTS = 'Total hosts: {0}'
+TOTAL_ACTIVE_HOSTS = 'Total active hosts: {0}'
+TOTAL_DOWN_HOSTS = 'Total down hosts: {0}'

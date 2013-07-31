@@ -80,10 +80,8 @@ def get_args():
     return parser.parse_args()
 
 
-def print_summary(start_time,
-                  end_time,
-                  total,
-                  ip_range_count=None,
+def print_summary(params=None,
+                  map_network=False,
                   total_open_ports=None):
     """
     Prints the summary
@@ -93,10 +91,20 @@ def print_summary(start_time,
     print(
         _(output_messages.SUMMARY)
     )
-    if ip_range_count:
+    if map_network:
+        print(
+            _(output_messages.TOTAL_ACTIVE_HOSTS.format(
+                params['HOSTS_UP']
+            ))
+        )
+        print(
+            _(output_messages.TOTAL_DOWN_HOSTS.format(
+                params['HOSTS_DOWN']
+            ))
+        )
         print(
             _(output_messages.TOTAL_HOSTS.format(
-                ip_range_count
+                params['TOTAL_HOSTS']
             ))
         )
 
@@ -108,17 +116,17 @@ def print_summary(start_time,
         )
     print(
         _(output_messages.SCANNING_STARTED.format(
-            start_time
+            params['START_TIME']
         ))
     )
     print(
         _(output_messages.SCANNING_ENDED.format(
-            end_time
+            params['END_TIME']
         ))
     )
     print(
         _(output_messages.SCANNING_COMPLETED.format(
-            total
+            params['TOTAL']
         ))
     )
 
@@ -282,9 +290,13 @@ class PortScanner():
         _end_time = time.ctime()
         _total = _t2 - _t1
 
-        print_summary(_start_time,
-                      _end_time,
-                      _total,
+        params = {}
+        params['END_TIME'] = _end_time
+        params['START_TIME'] = _start_time
+        params['TOTAL'] = _total
+        params['TOTAL_OPEN_PORTS'] = _total_open_ports
+
+        print_summary(params,
                       total_open_ports=_total_open_ports)
 
 
@@ -296,7 +308,11 @@ def map_network(ip_range):
         ip_range - range of ip's to scan
     """
 
-    _counter = 0
+    params = {}
+    _counter_active = 0
+    _counter_down = 0
+    _total_hosts = 0
+
     _is_range_valid = re.match(basedefs.IP_RANGE_REGEX, ip_range)
     if not _is_range_valid:
         print(
@@ -326,24 +342,35 @@ def map_network(ip_range):
 
             if output_messages.TEST_STR in buf:
                 print(
-                    _(output_messages.IP_IS_UP.format(
+                    _(output_messages.HOST_IS_UP.format(
                         _ip
                     ))
                 )
-                _counter += 1
+                _counter_active += 1
                 time.sleep(1)
         except socket.error:
-            pass
+            print(
+                _(output_messages.HOST_IS_DOWN.format(
+                    _ip
+                ))
+            )
+            _counter_down += 1
 
     # End timer
     _end_time = time.ctime()
     _t2 = datetime.now()
     _total = _t2 - _t1
+    _total_hosts = _counter_down + _counter_active
 
-    print_summary(_start_time,
-                  _end_time,
-                  _total,
-                  ip_range_count=_counter)
+    params['END_TIME'] = _end_time
+    params['TOTAL'] = _total
+    params['TOTAL_HOSTS'] = _total_hosts
+    params['HOSTS_DOWN'] = _counter_down
+    params['HOSTS_UP'] = _counter_active
+    params['START_TIME'] = _start_time
+
+    print_summary(params=params,
+                  map_network=True)
 
 
 def _verifyUserPermissions():
