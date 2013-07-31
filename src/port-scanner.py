@@ -80,6 +80,49 @@ def get_args():
     return parser.parse_args()
 
 
+def print_summary(start_time,
+                  end_time,
+                  total,
+                  ip_range_count=None,
+                  total_open_ports=None):
+    """
+    Prints the summary
+    """
+
+    print('\n\n')
+    print(
+        _(output_messages.SUMMARY)
+    )
+    if ip_range_count:
+        print(
+            _(output_messages.TOTAL_HOSTS.format(
+                ip_range_count
+            ))
+        )
+
+    if total_open_ports:
+        print(
+            _(output_messages.TOTAL_OPEN_PORTS.format(
+                total_open_ports
+            ))
+        )
+    print(
+        _(output_messages.SCANNING_STARTED.format(
+            start_time
+        ))
+    )
+    print(
+        _(output_messages.SCANNING_ENDED.format(
+            end_time
+        ))
+    )
+    print(
+        _(output_messages.SCANNING_COMPLETED.format(
+            total
+        ))
+    )
+
+
 class PortScanner():
     """
     Port scanner class
@@ -239,31 +282,10 @@ class PortScanner():
         _end_time = time.ctime()
         _total = _t2 - _t1
 
-        print('\n\n')
-        print(
-            _(output_messages.SUMMARY)
-        )
-        print(
-            _(output_messages.TOTAL_OPEN_PORTS.format(
-                _total_open_ports
-            ))
-        )
-        print(
-            _(output_messages.SCANNING_STARTED.format(
-                _start_time
-            ))
-        )
-        print(
-            _(output_messages.SCANNING_ENDED.format(
-                _end_time
-            ))
-        )
-
-        print(
-            _(output_messages.SCANNING_COMPLETED.format(
-                _total
-            ))
-        )
+        print_summary(_start_time,
+                      _end_time,
+                      _total,
+                      total_open_ports=_total_open_ports)
 
 
 def map_network(ip_range):
@@ -274,6 +296,7 @@ def map_network(ip_range):
         ip_range - range of ip's to scan
     """
 
+    _counter = 0
     _is_range_valid = re.match(basedefs.IP_RANGE_REGEX, ip_range)
     if not _is_range_valid:
         print(
@@ -292,21 +315,35 @@ def map_network(ip_range):
 
     r = iptools.IpRange(_start, _end)
 
-    for ip in r:
+    # Start timer
+    _start_time = time.ctime()
+    _t1 = datetime.now()
+    for _ip in r:
         try:
-            s.connect((ip, 22))
+            s.connect((_ip, 22))
             s.send(output_messages.TEST_STR)
             buf = s.recv(basedefs.BUFSIZE)
 
             if output_messages.TEST_STR in buf:
                 print(
                     _(output_messages.IP_IS_UP.format(
-                        ip
+                        _ip
                     ))
                 )
+                _counter += 1
                 time.sleep(1)
         except socket.error:
             pass
+
+    # End timer
+    _end_time = time.ctime()
+    _t2 = datetime.now()
+    _total = _t2 - _t1
+
+    print_summary(_start_time,
+                  _end_time,
+                  _total,
+                  ip_range_count=_counter)
 
 
 def _verifyUserPermissions():

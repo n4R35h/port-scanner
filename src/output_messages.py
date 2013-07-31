@@ -36,3 +36,4 @@ IP_RANGE_NOT_VALID = '{0} is not a valid ip range'
 ERR_EXP_INVALID_PERM = 'Error: insufficient permissions for user {}, ' \
                        'you must run with user root.'
 TOTAL_OPEN_PORTS = 'Total open ports: {0}'
+TOTAL_HOSTS = 'Total hosts: {0}'
