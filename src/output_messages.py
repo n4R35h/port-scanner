@@ -17,6 +17,7 @@ MISSING_OPTION = RED + 'ERROR:' + NO_COLOR + ' Missing option "{}"'
 KEYBOARD_INTERRUPT = 'You pressed Ctrl+C'
 SCANNING = 'Please wait, scanning remote ip "{0}"'
 OPEN_PORT = 'Port "{0}": \t' + GREEN + 'Open' + NO_COLOR + ' [{1}]'
+OPEN_PORT_WITH_GRABBER = OPEN_PORT + '\t' + 'Service name: {2}\t' + 'OS: {3}'
 RANGE_ERROR = RED + 'ERROR:' + NO_COLOR \
                     + ' in "--ip" First argument "{0}" ' \
                       'cannot be lower then second "{1}"'

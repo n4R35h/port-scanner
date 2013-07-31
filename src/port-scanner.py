@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import gettext
+import urllib2
 import pwd
 import os
 import re
@@ -104,7 +105,20 @@ class PortScanner():
         self.ports = ports
         self.type = type
 
-    def port_scanner(self):
+    def _grab_http(self):
+        """
+        Grabs the http info
+        Returns:
+            _service - service name
+             _os - OS name
+        """
+
+        u = urllib2.urlopen('http://' + self.dst_ip_address)
+        _service, _os = u.info()['Server'].split()[:]
+
+        return _service, _os
+
+    def port_scanner(self, with_grabber=False):
         """
         Scans the ports of the given ip address
 
@@ -154,20 +168,20 @@ class PortScanner():
         _t1 = datetime.now()
 
         try:
-            for port in _ports:
+            for _port in _ports:
                 _protocol = output_messages.CANT_RECOGNIZE
-                if port in basedefs.ports_mapping:
-                    _protocol = basedefs.ports_mapping[port].split(',')[0]
+                if _port in basedefs.ports_mapping:
+                    _protocol = basedefs.ports_mapping[_port].split(',')[0]
 
                 sock = socket.socket(_socket_family, _socket_type)
                 sock.settimeout(basedefs.SOCKET_TIMEOUT)
                 if self.protocol_type == 'UDP':
                     try:
-                        sock.sendto(output_messages.TEST_STR, (self.dst_ip_address, int(port)))
+                        sock.sendto(output_messages.TEST_STR, (self.dst_ip_address, int(_port)))
                         recv, svr = sock.recvfrom(255)
                         print(
                             _(output_messages.OPEN_PORT.format(
-                                port,
+                                _port,
                                 _protocol
                             ))
                         )
@@ -180,17 +194,33 @@ class PortScanner():
                 _result = -1
                 if self.protocol_type == 'TCP':
                     try:
-                        _result = sock.connect_ex((self.dst_ip_address, int(port)))
+                        _result = sock.connect_ex((self.dst_ip_address, int(_port)))
+                        if _result == 0:
+                            # Check if grabber is needed
+                            if with_grabber:
+                                if int(_port) == 80:
+                                    _server, _os = self._grab_http()
+                                    print(
+                                        _(output_messages.OPEN_PORT_WITH_GRABBER.format(
+                                            _port,
+                                            _protocol,
+                                            _server,
+                                            _os
+                                        ))
+                                    )
+
+                                    sock.close()
+                                    time.sleep(self.interval * 0.001)
+                                    continue
+                            print(
+                                _(output_messages.OPEN_PORT.format(
+                                    _port,
+                                    _protocol
+                                ))
+                            )
                     except socket.error:
                         pass
 
-                if _result == 0:
-                    print(
-                        _(output_messages.OPEN_PORT.format(
-                            port,
-                            _protocol
-                        ))
-                    )
                 sock.close()
                 time.sleep(self.interval * 0.001)
 
@@ -320,7 +350,12 @@ def main():
         and options.protocol_type \
             and options.ports \
             and options.scan_type == 'full':
+
         port_scanner = create_port_scanner(options)
+
+        if options.banner_grabber:
+            port_scanner.port_scanner(with_grabber=True)
+            sys.exit(Status.OK)
         port_scanner.port_scanner()
         sys.exit(Status.OK)
 
