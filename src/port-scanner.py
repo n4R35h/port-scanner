@@ -222,8 +222,8 @@ class PortScanner():
         try:
             for _port in _ports:
                 _protocol = output_messages.CANT_RECOGNIZE
-                if _port in basedefs.ports_mapping:
-                    _protocol = basedefs.ports_mapping[_port].split(',')[0]
+                if str(_port) in basedefs.ports_mapping:
+                    _protocol = basedefs.ports_mapping[str(_port)].split(',')[0]
 
                 sock = socket.socket(_socket_family, _socket_type)
                 sock.settimeout(basedefs.SOCKET_TIMEOUT)
