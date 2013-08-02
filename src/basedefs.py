@@ -8,6 +8,9 @@ IP_RANGE_REGEX = '^{0}-{1}$'.format(
     _REGEX
 )
 FTP_WELCOME_REGEX = '\(.*\)'
+OTHER_LINUX = 'Other: Linux'
+OPEN_SSH = 'openssh'
+VSFTPD = 'vsftpd'
 ports_mapping = {
     '80': 'http, tcp',
     '443': 'https, tcp',

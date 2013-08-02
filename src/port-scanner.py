@@ -167,24 +167,31 @@ class PortScanner():
 
         u = urllib2.urlopen('http://' + self.dst_ip_address)
         _service, _os = u.info()['Server'].split()[:]
+        _os = _os.strip('()')
 
         return _service, _os
 
-    def _grab_ftp(self):
+    def _grab(self, port):
         """
         Grabs the ftp info
         Returns:
             _service - service name
             _os - OS name
         """
-        ftp = FTP(host=self.dst_ip_address, timeout=2)
-        _service = re.findall(basedefs.FTP_WELCOME_REGEX,
-                              ftp.getwelcome()).pop().strip('()')
-        _os = None
-        if 'vsftpd' in _service.lower():
-            _os = 'Linux'
+        s = socket.socket()
+        s.connect((self.dst_ip_address, int(port)))
+        _service = s.recv(basedefs.BUFSIZE)
 
-        ftp.quit()
+        if basedefs.VSFTPD in _service.lower():
+            _service = re.findall(basedefs.FTP_WELCOME_REGEX,
+                                  _service).pop().strip('()').rstrip()
+            _os = basedefs.OTHER_LINUX
+        elif basedefs.OPEN_SSH in _service.lower():
+            _service = _service.rstrip()
+            _os = basedefs.OTHER_LINUX
+
+        s.close()
+
         return _service, _os
 
     def port_scanner(self, with_grabber=False):
@@ -286,7 +293,21 @@ class PortScanner():
                                     continue
 
                                 if int(_port) == 21:
-                                    _server, _os = self._grab_ftp()
+                                    _server, _os = self._grab(_port)
+                                    print(
+                                        _(output_messages.OPEN_PORT_WITH_GRABBER.format(
+                                            _port,
+                                            _protocol,
+                                            _server,
+                                            _os
+                                        ))
+                                    )
+                                    time.sleep(self.interval * 0.001)
+                                    _total_open_ports += 1
+                                    continue
+
+                                if int(_port) == 22:
+                                    _server, _os = self._grab(_port)
                                     print(
                                         _(output_messages.OPEN_PORT_WITH_GRABBER.format(
                                             _port,
