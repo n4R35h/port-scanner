@@ -7,6 +7,7 @@ IP_RANGE_REGEX = '^{0}-{1}$'.format(
     _REGEX,
     _REGEX
 )
+FTP_WELCOME_REGEX = '\(.*\)'
 ports_mapping = {
     '80': 'http, tcp',
     '443': 'https, tcp',

@@ -12,6 +12,7 @@ import time
 from datetime import datetime
 import output_messages
 import basedefs
+from ftplib import FTP
 try:
     import iptools
 except ImportError:
@@ -169,6 +170,23 @@ class PortScanner():
 
         return _service, _os
 
+    def _grab_ftp(self):
+        """
+        Grabs the ftp info
+        Returns:
+            _service - service name
+            _os - OS name
+        """
+        ftp = FTP(host=self.dst_ip_address, timeout=2)
+        _service = re.findall(basedefs.FTP_WELCOME_REGEX,
+                              ftp.getwelcome()).pop().strip('()')
+        _os = None
+        if 'vsftpd' in _service.lower():
+            _os = 'Linux'
+
+        ftp.quit()
+        return _service, _os
+
     def port_scanner(self, with_grabber=False):
         """
         Scans the ports of the given ip address
@@ -266,12 +284,27 @@ class PortScanner():
                                     time.sleep(self.interval * 0.001)
                                     _total_open_ports += 1
                                     continue
+
+                                if int(_port) == 21:
+                                    _server, _os = self._grab_ftp()
+                                    print(
+                                        _(output_messages.OPEN_PORT_WITH_GRABBER.format(
+                                            _port,
+                                            _protocol,
+                                            _server,
+                                            _os
+                                        ))
+                                    )
+                                    time.sleep(self.interval * 0.001)
+                                    _total_open_ports += 1
+                                    continue
                             print(
                                 _(output_messages.OPEN_PORT.format(
                                     _port,
                                     _protocol
                                 ))
                             )
+                            sock.close()
                             _total_open_ports += 1
                     except socket.error:
                         pass
