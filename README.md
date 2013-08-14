@@ -12,7 +12,10 @@ Examples:
 
 `$ sudo python port-scanner.py --ip 10.0.0.1 -p 80,22 --protocol-type TCP -b`
 
+**Scan ip without banner grabber:**
+
+`$ sudo python port-scanner.py --ip 10.0.0.1 -p 80,22 --protocol-type TCP`
+
 **Scan with a port range:**
 
-`$ sudo python port-scanner.py --ip 10.0.0.1 -p 1-1024 --protocol-type TCP -b`
-
+`$ sudo python port-scanner.py --ip 10.0.0.1 -p 1-1024 --protocol-type TCP`
