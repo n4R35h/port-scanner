@@ -166,10 +166,15 @@ class PortScanner():
         """
 
         u = urllib2.urlopen('http://' + self.dst_ip_address)
-        _service, _os = u.info()['Server'].split()[:]
-        _os = _os.strip('()')
 
-        return _service, _os
+        if len(u.info()['Server'].split()) == 2:
+            _service, _os = u.info()['Server'].split()
+            _os = _os.strip('()')
+            return _service, _os
+
+        if len(u.info()['Server'].split()) == 1:
+            _service = u.info()['Server']
+            return _service, None
 
     def _grab(self, port):
         """
