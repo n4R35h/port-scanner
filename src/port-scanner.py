@@ -17,7 +17,7 @@ try:
     import iptools
 except ImportError:
     print(
-        _(output_messages.CANT_IMPORT.format(
+         (output_messages.CANT_IMPORT.format(
             'iptools'
         ))
     )
